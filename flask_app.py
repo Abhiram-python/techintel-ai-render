@@ -81,6 +81,7 @@ response = client.models.generate_content(
         {{
             "id": "1",
             "name": "Hackathon 1",
+            "event_type": "Virtual",
             "date": "2024-07-01",
             "location": "Hyderabad, Telangana, India",
             "organizer": "Organization 1",
@@ -90,6 +91,7 @@ response = client.models.generate_content(
         {{
             "id": "2",
             "name": "Hackathon 2",
+            "event_type": "In-Person",
             "date": "2024-08-15",
             "location": "Hyderabad, Telangana, India",
             "organizer": "Organization 2",
