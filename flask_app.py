@@ -22,15 +22,6 @@ app.secret_key = 'your-secret-key-change-this'
 
 # CORS(app)
 
-# CORS(app, resources={
-#     r"/api/*": {
-#         "origins": ["*"],  # Allow requests from any origin
-#         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-#         "allow_headers": ["Content-Type", "Authorization"],
-#         "supports_credentials": True
-#     }
-# })
-
 from flask_cors import CORS
 
 CORS(app, resources={
@@ -50,18 +41,17 @@ from serpapi import GoogleSearch
 
 ########### Using the SerpAPI to get search results for a query
 
-params = {
-  "q": "hackathons near me",
-  "location": "hyderabad, telangana, india",
-  "hl": "en",
-  "gl": "us",
-  "google_domain": "google.com",
-  "api_key": "7fcde04d134888de2c1e72749f75b98445a94420088b19a1249f3b5d970497c7"
-}
+# params = {
+#   "q": "hackathons near me",
+#   "location": "hyderabad, telangana, india",
+#   "hl": "en",
+#   "gl": "us",
+#   "google_domain": "google.com",
+#   "api_key": "7fcde04d134888de2c1e72749f75b98445a94420088b19a1249f3b5d970497c7"
+# }
 
-search = GoogleSearch(params)
-results = search.get_dict()
-# print(results)
+# search = GoogleSearch(params)
+# results = search.get_dict()
 
 ############# Using the Google Gemini API to generate content based on the search results
 
@@ -73,36 +63,83 @@ api_key = os.getenv("GENAI_API_KEY")
 
 client = genai.Client(api_key=api_key)
 
-response = client.models.generate_content(
-    model="gemini-3-flash-preview",
-    contents=f'''from the results of the search{results} go through all the sites and give a list or dictionarys which have id,name,date,location,organization,description and link of the hackathons.
-    i want all this in this format:
-    [
-        {{
-            "id": "1",
-            "name": "Hackathon 1",
-            "event_type": "Virtual",
-            "date": "2024-07-01",
-            "location": "Hyderabad, Telangana, India",
-            "organizer": "Organization 1",
-            "description": "Description of Hackathon 1",
-            "link": "https://example.com/hackathon1"
-        }},
-        {{
-            "id": "2",
-            "name": "Hackathon 2",
-            "event_type": "In-Person",
-            "date": "2024-08-15",
-            "location": "Hyderabad, Telangana, India",
-            "organizer": "Organization 2",
-            "description": "Description of Hackathon 2",
-            "link": "https://example.com/hackathon2"
-        }},
-    ] and note don't give any other text except the list of dictionarys. and date should only be on start date of the hackathon
-     and i want all which are listed in the search results like 10''',
-)
+# response = client.models.generate_content(
+#     model="gemini-3-flash-preview",
+#     contents=f'''from the results of the search{results} go through all the sites and give a list or dictionarys which have id,name,date,location,organization,description and link of the hackathons.
+#     i want all this in this format:
+#     [
+#         {{
+#             "id": "1",
+#             "name": "Hackathon 1",
+#             "event_type": "Virtual",
+#             "date": "2024-07-01",
+#             "location": "Hyderabad, Telangana, India",
+#             "organizer": "Organization 1",
+#             "description": "Description of Hackathon 1",
+#             "link": "https://example.com/hackathon1"
+#         }},
+#         {{
+#             "id": "2",
+#             "name": "Hackathon 2",
+#             "event_type": "In-Person",
+#             "date": "2024-08-15",
+#             "location": "Hyderabad, Telangana, India",
+#             "organizer": "Organization 2",
+#             "description": "Description of Hackathon 2",
+#             "link": "https://example.com/hackathon2"
+#         }},
+#     ] and note don't give any other text except the list of dictionarys. and date should only be on start date of the hackathon
+#      and i want all which are listed in the search results like 10''',
+# )
 
 # print(response.text)
+
+def search_results(q):
+    params = {
+        "q": q,
+        "location": "hyderabad, telangana, india",
+        "hl": "en",
+        "gl": "us",
+        "google_domain": "google.com",
+        "api_key": "7fcde04d134888de2c1e72749f75b98445a94420088b19a1249f3b5d970497c7"
+    }
+
+    search = GoogleSearch(params)
+    results=search.get_dict()
+
+    response = client.models.generate_content(
+        model="gemini-3-flash-preview",
+        contents=f'''from the results of the search{results} go through all the sites and give a list or dictionarys which have id,name,date,location,organization,description and link of the Engagements.
+        i want all this in this format:
+        [
+            {{
+                "id": "1",
+                "name": "Engagements 1",
+                "event_type": "Virtual",
+                "date": "2024-07-01",
+                "location": "Hyderabad, Telangana, India",
+                "organizer": "Organization 1",
+                "description": "Description of Engagements 1",
+                "link": "https://example.com/Engagements1"
+            }},
+            {{
+                "id": "2",
+                "name": "Engagements 2",
+                "event_type": "In-Person",
+                "date": "2024-08-15",
+                "location": "Hyderabad, Telangana, India",
+                "organizer": "Organization 2",
+                "description": "Description of Engagements 2",
+                "link": "https://example.com/Engagements2"
+            }},
+        ] and note don't give any other text except the list of dictionarys. and date should only be on start date of the Engagements and i want all which are listed in the search results like 10''',
+    )
+
+    return response.text
+
+responsehackathons = search_results("hackathons in Hyderabad")
+responsesummits = search_results("summits in hyderabad")
+responseinternships = search_results("internships in Hyderabad")
 
 # ============================================================================
 # Authentication Middleware
@@ -240,83 +277,9 @@ def api_logout():
 def api_hackathons():
     """Get all hackathons"""
 
-    global response
-
-    # TODO: Fetch from database
-    hackathons = [
-        {
-            'id': 1,
-            'name': 'TechCrunch Disrupt 2026',
-            'date': 'March 15-17, 2026',
-            'location': 'San Francisco, CA',
-            'organizer': 'TechCrunch',
-            'description': 'The world\'s leading tech conference with hackathon competition.',
-            'link': 'https://example.com/hackathon1'
-        },
-        {
-            'id': 2,
-            'name': 'AI Innovation Hackathon',
-            'date': 'April 10-12, 2026',
-            'location': 'New York, NY',
-            'organizer': 'AI Association',
-            'description': 'Focus on AI and machine learning applications.',
-            'link': 'https://example.com/hackathon2'
-        },
-        {
-            'id': 3,
-            'name': 'Web3 Developer Summit',
-            'date': 'May 5-7, 2026',
-            'location': 'Austin, TX',
-            'organizer': 'Web3 Foundation',
-            'description': 'Explore blockchain and decentralized applications.',
-            'link': 'https://example.com/hackathon3'
-        }
-    ]
-
-    # params = {
-    # "q": "hackathons near me",
-    # "location": "hyderabad, telangana, india",
-    # "hl": "en",
-    # "gl": "us",
-    # "google_domain": "google.com",
-    # "api_key": "7fcde04d134888de2c1e72749f75b98445a94420088b19a1249f3b5d970497c7"
-    # }
-
-    # search = GoogleSearch(params)
-    # results = search.get_dict()
-
-    # client = genai.Client(api_key="AIzaSyDJJWKX0u45Ej_EyzKhJFjvlNYmhtwM__s")
-
-    # response = client.models.generate_content(
-    #     model="gemini-3-flash-preview",
-    #     contents=f'''from the results of the search{results} go through all the sites and give a list or dictionarys which have id,name,date,location,organization,description and link of the hackathons.
-    #     i want all this in this format:
-    #     [
-    #         {{
-    #             "id": "1",
-    #             "name": "Hackathon 1",
-    #             "date": "2024-07-01",
-    #             "location": "Hyderabad, Telangana, India",
-    #             "organizer": "Organization 1",
-    #             "description": "Description of Hackathon 1",
-    #             "link": "https://example.com/hackathon1"
-    #         }},
-    #         {{
-    #             "id": "2",
-    #             "name": "Hackathon 2",
-    #             "date": "2024-08-15",
-    #             "location": "Hyderabad, Telangana, India",
-    #             "organizer": "Organization 2",
-    #             "description": "Description of Hackathon 2",
-    #             "link": "https://example.com/hackathon2"
-    #         }},
-    #     ] and note don't give any other text except the list of dictionarys. and date should only be on start date of the hackathon''',
-    # )
-    data_list = json.loads(response.text)  # now it's a Python list of dicts
+    data_list = json.loads(responsehackathons)  # now it's a Python list of dicts
 
     return jsonify({'data': data_list})
-
-    # return jsonify({'data': response.text})
 
 # ============================================================================
 # API Routes - Summits
@@ -325,37 +288,10 @@ def api_hackathons():
 @app.route('/api/summits', methods=['GET'])
 def api_summits():
     """Get all tech summits"""
-    # TODO: Fetch from database
-    summits = [
-        {
-            'id': 1,
-            'name': 'Google Cloud Next',
-            'date': 'March 20-22, 2026',
-            'location': 'Las Vegas, NV',
-            'organizer': 'Google Cloud',
-            'description': 'Annual conference for Google Cloud professionals and developers.',
-            'link': 'https://example.com/summit1'
-        },
-        {
-            'id': 2,
-            'name': 'AWS re:Invent',
-            'date': 'May 10-14, 2026',
-            'location': 'Las Vegas, NV',
-            'organizer': 'Amazon Web Services',
-            'description': 'Premier event for cloud computing professionals.',
-            'link': 'https://example.com/summit2'
-        },
-        {
-            'id': 3,
-            'name': 'Microsoft Ignite',
-            'date': 'June 15-17, 2026',
-            'location': 'Orlando, FL',
-            'organizer': 'Microsoft',
-            'description': 'Learn about the latest Microsoft technologies and innovations.',
-            'link': 'https://example.com/summit3'
-        }
-    ]
-    return jsonify({'data': summits})
+
+    data_list= json.loads(responsesummits)
+
+    return jsonify({'data': data_list})
 
 # ============================================================================
 # API Routes - Internships
@@ -364,70 +300,10 @@ def api_summits():
 @app.route('/api/internships', methods=['GET'])
 def api_internships():
     """Get all internships"""
-    # TODO: Fetch from database with pagination
-    internships = [
-        {
-            'id': 1,
-            'company': 'Google',
-            'role': 'Software Engineer Intern',
-            'location': 'Mountain View, CA',
-            'type': 'Onsite',
-            'salary': '$50,000 - $65,000',
-            'description': 'Join Google\'s engineering team and work on world-class projects.',
-            'apply_link': 'https://google.com/careers'
-        },
-        {
-            'id': 2,
-            'company': 'Microsoft',
-            'role': 'AI/ML Intern',
-            'location': 'Remote',
-            'type': 'Remote',
-            'salary': '$45,000 - $60,000',
-            'description': 'Develop AI solutions with Microsoft\'s research team.',
-            'apply_link': 'https://microsoft.com/careers'
-        },
-        {
-            'id': 3,
-            'company': 'Meta',
-            'role': 'Full Stack Intern',
-            'location': 'Menlo Park, CA',
-            'type': 'Hybrid',
-            'salary': '$55,000 - $70,000',
-            'description': 'Build scalable systems used by billions of people.',
-            'apply_link': 'https://meta.com/careers'
-        },
-        {
-            'id': 4,
-            'company': 'Apple',
-            'role': 'iOS Developer Intern',
-            'location': 'Cupertino, CA',
-            'type': 'Onsite',
-            'salary': '$48,000 - $63,000',
-            'description': 'Create innovative iOS applications.',
-            'apply_link': 'https://apple.com/careers'
-        },
-        {
-            'id': 5,
-            'company': 'Amazon',
-            'role': 'Backend Engineer Intern',
-            'location': 'Seattle, WA',
-            'type': 'Hybrid',
-            'salary': '$50,000 - $65,000',
-            'description': 'Work on AWS and e-commerce infrastructure.',
-            'apply_link': 'https://amazon.com/careers'
-        },
-        {
-            'id': 6,
-            'company': 'Tesla',
-            'role': 'Machine Learning Intern',
-            'location': 'Palo Alto, CA',
-            'type': 'Onsite',
-            'salary': '$52,000 - $67,000',
-            'description': 'Develop ML models for autonomous vehicles.',
-            'apply_link': 'https://tesla.com/careers'
-        }
-    ]
-    return jsonify({'data': internships})
+    
+    data_list= json.loads(responseinternships)
+
+    return jsonify({'data': data_list})
 
 @app.route('/api/internships/search', methods=['GET'])
 def api_search_internships():
