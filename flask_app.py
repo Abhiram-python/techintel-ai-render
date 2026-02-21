@@ -35,7 +35,7 @@ from flask_cors import CORS
 
 CORS(app, resources={
     r"/api/*": {
-        "origins": "https://jazzy-choux-ffc9f1.netlify.app",
+        "origins": ["https://stupendous-yeot-7f0b3c.netlify.app","https://jazzy-choux-ffc9f1.netlify.app"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
